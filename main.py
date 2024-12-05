@@ -6,7 +6,7 @@ import sys
 import random
 from UI import Ui_MainWindow
 
-SCREEN_SIZE = [680, 480]
+screen_s = [680, 480]
 
 
 class Circles(QMainWindow, Ui_MainWindow):
@@ -30,7 +30,7 @@ class Circles(QMainWindow, Ui_MainWindow):
             qp.begin(self)
             qp.setPen(QColor(*self.color))
             qp.setBrush(QColor(*self.color))
-            self.x, self.y = random.randint(100, SCREEN_SIZE[0] - 100), random.randint(100, SCREEN_SIZE[1] - 100)
+            self.x, self.y = random.randint(100, screen_s[0] - 100), random.randint(100, screen_s[1] - 100)
             if self.figure == 'circle':
                 qp.drawEllipse(self.x, self.y, self.size, self.size)
             qp.end()
