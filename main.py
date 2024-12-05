@@ -1,39 +1,51 @@
-from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow
-from PyQt6.QtWidgets import QPushButton
-from PyQt6.QtGui import QPainter, QColor
 import sys
 import random
+from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import QPainter, QColor
+from PyQt6.QtCore import Qt
+from PyQt6.uic.properties import QtCore
+
 from UI import Ui_MainWindow
 
-screen_s = [680, 480]
 
+class CentralWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(CentralWidget, self).__init__(parent)
+        self.circles = []
 
-class Circles(QMainWindow, Ui_MainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.flag = False
-        self.pushButton.clicked.connect(self.draw)
-        self.coords = []
+    def add_circle(self, x, y, diameter):
+        self.circles.append((x, y, diameter))
+        self.update()
 
-    def draw(self):
-        self.figure = 'circle'
-        self.size = random.randint(10, 100)
-        self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))  # 'yellow'
-        self.flag = True
+    def clear_circles(self):
+        self.circles.clear()
         self.update()
 
     def paintEvent(self, event):
-        if self.flag:
-            qp = QPainter()
-            qp.begin(self)
-            qp.setPen(QColor(*self.color))
-            qp.setBrush(QColor(*self.color))
-            self.x, self.y = random.randint(100, screen_s[0] - 100), random.randint(100, screen_s[1] - 100)
-            if self.figure == 'circle':
-                qp.drawEllipse(self.x, self.y, self.size, self.size)
-            qp.end()
+        painter = QPainter(self)
+        painter.setBrush(QColor('yellow'))
+        for x, y, diameter in self.circles:
+            painter.drawEllipse(x, y, diameter, diameter)
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.setupUi(self)
+        self.central_widget = CentralWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        self.pushButton.setParent(self.central_widget)
+        self.pushButton.setGeometry(150, 120, 100, 32)
+        self.pushButton.clicked.connect(self.draw_circle)
+
+    def draw_circle(self):
+        self.central_widget.clear_circles()
+
+        diameter = random.randint(10, 100)
+        x = random.randint(0, self.central_widget.width() - diameter)
+        y = random.randint(0, self.central_widget.height() - diameter)
+        self.central_widget.add_circle(x, y, diameter)
 
 
 def except_hook(cls, exception, traceback):
@@ -41,8 +53,8 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
     sys.excepthook = except_hook
-    ex = Circles()
-    ex.show()
+    window.show()
     sys.exit(app.exec())
